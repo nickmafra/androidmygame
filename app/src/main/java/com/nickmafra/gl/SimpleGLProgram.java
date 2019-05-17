@@ -23,24 +23,23 @@ public class SimpleGLProgram implements GLProgram {
     @Override
     public void load(Context context) {
         reset();
-        int vsId = 0, fsId = 0;
 
-        // compila shaders
+        // carrega e compila shaders
         String vsCode = GLUtil.loadAsset(context, "shaders/simpleVS.glsl");
-        if (vsCode != null) {
-            vsId = GLUtil.compileShader(GL_VERTEX_SHADER, vsCode);
-        }
         String fsCode = GLUtil.loadAsset(context, "shaders/simpleFS.glsl");
-        if (fsCode != null) {
-            fsId = GLUtil.compileShader(GL_FRAGMENT_SHADER, fsCode);
+        if (vsCode == null || fsCode == null) {
+            throw new RuntimeException("Erro ao carregar shaders.");
+        }
+        int vsId = GLUtil.compileShader(GL_VERTEX_SHADER, vsCode);
+        int fsId = GLUtil.compileShader(GL_FRAGMENT_SHADER, fsCode);
+        if (vsId == 0 || fsId == 0) {
+            throw new RuntimeException("Erro ao compilar shaders.");
         }
 
         // atrela programa
-        if (vsId != 0 && fsId != 0) {
-            id = GLUtil.linkProgram(vsId, fsId);
-        }
+        id = GLUtil.linkProgram(vsId, fsId);
         if (id == 0) {
-            throw new RuntimeException("Erro ao compilar " + TAG);
+            throw new RuntimeException("Erro ao carregar " + TAG);
         }
 
         mvpMatrixId = glGetUniformLocation(id, "uMVPMatrix");

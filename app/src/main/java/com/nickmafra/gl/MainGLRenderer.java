@@ -6,23 +6,42 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
 public class MainGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
-    private PiramideModel piramide;
 
-    // mMVPMatrix is an abbreviation for "Model View Projection Matrix"
-    private final float[] mMVPMatrix = new float[16];
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
+    private List<Object3D> objetos;
+
     public MainGLRenderer(Context context) {
         this.context = context;
-        piramide = new PiramideModel();
-        Matrix.setIdentityM(rotationMatrix, 0);
+
+        objetos = new ArrayList<>();
+    }
+
+    public List<Object3D> getObjetos() {
+        return objetos;
+    }
+
+    private volatile boolean modelsLoaded = true;
+
+    public void requestLoadModels() {
+        modelsLoaded = false;
+    }
+
+    private void loadModels() {
+        for (Object3D obj : objetos) {
+            obj.getModel().load(context);
+        }
+        modelsLoaded = true;
     }
 
     @Override
@@ -31,8 +50,6 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
 
         glEnable(GL_DEPTH_TEST);
         glDepthFunc(GL_LESS);
-
-        piramide.load(context);
     }
 
     @Override
@@ -43,40 +60,21 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
         Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
     }
 
+    // mVP is an abbreviation for "View Projection Matrix"
+    private final float[] mVP = new float[16];
+
     @Override
     public void onDrawFrame(GL10 gl) {
-        // Draw background color
-        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-        // Set the camera position (View matrix)
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 5, 0f, 0f, 2f, 0f, 1.0f, 0.0f);
-        // Calculate the projection and view transformation
-        Matrix.multiplyMM(mMVPMatrix, 0, mProjectionMatrix, 0, mViewMatrix, 0);
-        // Draw model
-        drawPiramide();
-    }
-
-    private volatile float rvX;
-    private volatile float rvY;
-
-    public void setRotationVector(float rvX, float rvY) {
-        this.rvX = rvX;
-        this.rvY = rvY;
-    }
-
-    private float[] rotationMatrix = new float[16];
-    private float[] scratch = new float[16];
-
-    private void drawPiramide() {
-        float v = (float) Math.sqrt(rvX*rvX + rvY*rvY);
-        if (v > 0.01) {
-            // acumula rotações
-            Matrix.setRotateM(scratch, 0, v, rvY, rvX, 0);
-            Matrix.multiplyMM(rotationMatrix, 0, scratch, 0, rotationMatrix, 0);
+        if (!modelsLoaded) {
+            loadModels();
         }
+        glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        // calcula matriz resultante
-        Matrix.multiplyMM(scratch, 0, mMVPMatrix, 0, rotationMatrix, 0);
-        piramide.setMvpMatrix(scratch);
-        piramide.draw();
+        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 5, 0f, 0f, 2f, 0f, 1.0f, 0.0f);
+        Matrix.multiplyMM(mVP, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+
+        for (Object3D obj : objetos) {
+            obj.draw(mVP);
+        }
     }
 }

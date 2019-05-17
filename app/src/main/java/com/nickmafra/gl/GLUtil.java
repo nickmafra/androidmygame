@@ -40,14 +40,14 @@ public class GLUtil {
 
     public static int compileShader(int type, String shaderCode) {
         int shaderID = glCreateShader(type);
+        checkGlError("glCreateShader");
         glShaderSource(shaderID, shaderCode);
         glCompileShader(shaderID);
         // verifica erros
         int[] status = new int[1];
         glGetShaderiv(shaderID, GL_COMPILE_STATUS, status, 0);
         if (status[0] == 0) {
-            Log.e(TAG, "Could not compile shader:");
-            Log.e(TAG, glGetShaderInfoLog(shaderID));
+            Log.e(TAG, "Could not compile shader:" + glGetShaderInfoLog(shaderID));
             glDeleteShader(shaderID);
             shaderID = 0;
         }
