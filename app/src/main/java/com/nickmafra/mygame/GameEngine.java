@@ -7,15 +7,22 @@ import com.nickmafra.gl.MainGLRenderer;
 import com.nickmafra.gl.Object3D;
 import com.nickmafra.gl.PiramideModel;
 
+import java.util.ArrayList;
+import java.util.List;
+import java.util.Random;
+
 public class GameEngine implements Runnable {
 
-    private long framePeriod = 16; // milissegundos entre cada frame
+    private long tickPeriod = 15; // milissegundos entre cada tick
+    private long framePeriod = 20; // milissegundos entre cada frame
 
     private Thread thread;
     private MainGLRenderer renderer;
     private GLSurfaceView glView;
 
+    private PiramideModel piramideModel;
     private Object3D piramide;
+    private List<Object3D> obstaculos;
 
     public GameEngine(Context context) {
         renderer = new MainGLRenderer(context);
@@ -36,6 +43,7 @@ public class GameEngine implements Runnable {
     private long timeNow;
     private long lastTime;
     private long lastFrameTime;
+    private long lastTickTime;
 
     private long clockTime() {
         return System.currentTimeMillis();
@@ -45,15 +53,14 @@ public class GameEngine implements Runnable {
         ticks = 0;
         startTime = clockTime();
         timeNow = 0;
-        lastFrameTime = -framePeriod; // força primeira renderização
+        lastFrameTime = -framePeriod; // força primeiro frame
+        lastTickTime = -tickPeriod; // força primeiro tick
     }
 
     public void calcTimeNow() {
-        ticks++;
         lastTime = timeNow;
         timeNow = clockTime() - startTime;
     }
-
 
     public synchronized void start() {
         if (stop == false) {
@@ -64,8 +71,9 @@ public class GameEngine implements Runnable {
         }
         stop = false;
 
+        renderer.getModels().clear();
         renderer.getObjetos().clear();
-        renderer.getObjetos().add(piramide = new Object3D(new PiramideModel()));
+        startContexto1();
         renderer.requestLoadModels();
 
         thread = new Thread(this, "GameEngine");
@@ -84,10 +92,64 @@ public class GameEngine implements Runnable {
         calcTimeStart();
         while (!stop) {
             calcTimeNow();
-            updatePiramide();
+            if (timeNow - lastTickTime > tickPeriod) {
+                lastTickTime = timeNow;
+                ticks++;
+                for (Object3D obj : renderer.getObjetos()) {
+                    obj.setTimeNow(ticks);
+                }
+                runContexto1();
+            }
+            calcTimeNow();
             if (timeNow - lastFrameTime > framePeriod) {
                 lastFrameTime = timeNow;
                 glView.requestRender();
+            }
+        }
+    }
+
+    // roteiro do jogo
+
+    private Random random = new Random();
+
+    private void updateObstaculo(Object3D obstaculo) {
+        obstaculo.update();
+        float scale = (2 + random.nextInt(4)) / 200f;
+        obstaculo.setScale(scale, scale, scale);
+        float x = (random.nextInt(401) - 200) / 100f;
+        float y = (random.nextInt(401) - 200) / 100f;
+        obstaculo.setPosition(x, y, -1);
+        float vx = (random.nextInt(41) - 20) / 10000f;
+        float vy = (random.nextInt(41) - 20) / 10000f;
+        float vz = (random.nextInt(91) + 10) / 10000f;
+        obstaculo.setVelocity(0, 0, vz);
+        float a = (random.nextInt(41) - 20) / 100f;
+        obstaculo.setVRotation(0, 0, 1, a);
+    }
+
+    private void startContexto1() {
+        piramideModel = new PiramideModel();
+        renderer.getModels().add(piramideModel);
+
+        piramide = new Object3D(piramideModel);
+        piramide.setPosition(0, 0, -0.25f);
+        piramide.setScale(0.2f, 0.2f, 0.2f);
+        renderer.getObjetos().add(piramide);
+        obstaculos = new ArrayList<>();
+        for (int i = 0; i < 20; i++) {
+            Object3D obstaculo = new Object3D(piramideModel);
+            updateObstaculo(obstaculo);
+            obstaculos.add(obstaculo);
+        }
+        renderer.getObjetos().addAll(obstaculos);
+    }
+
+    private void runContexto1() {
+        updatePiramide();
+        for (Object3D obstaculo : obstaculos) {
+            float[] p = obstaculo.getPositionNow();
+            if (p[2] >= 1) {
+                updateObstaculo(obstaculo);
             }
         }
     }
@@ -118,7 +180,6 @@ public class GameEngine implements Runnable {
     }
 
     private void updatePiramide() {
-        piramide.setTimeNow((float) ticks);
         if (lock > 0) {
             piramide.update();
             if (lock == 1 || lock == 3) {

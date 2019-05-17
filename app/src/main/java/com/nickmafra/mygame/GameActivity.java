@@ -20,4 +20,10 @@ public class GameActivity extends AppCompatActivity {
 
         gameEngine.start();
     }
+
+    @Override
+    protected void onStop() {
+        super.onStop();
+        gameEngine.stop();
+    }
 }

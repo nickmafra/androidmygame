@@ -8,12 +8,12 @@ import static android.opengl.GLES20.*;
 
 public class PiramideModel implements GLModel {
 
-            // position             // color
+            // position          // color
     private static final float verticesData[] = {
-            -0.433f, -0.25f, +0.25f, 0.0f, 0.0f, 1.0f, // 0 left blue
-            +0.433f, -0.25f, +0.25f, 1.0f, 0.0f, 0.0f, // 1 right red
-            +0.000f, +0.50f, +0.00f, 0.0f, 1.0f, 0.0f, // 2 top green
-            +0.000f, -0.25f, -0.50f, 1.0f, 1.0f, 1.0f, // 3 back white
+            -1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // 0 left blue
+            +1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, // 1 right red
+            +1.0f, +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, // 2 top green
+            -1.0f, -1.0f, +1.0f, 1.0f, 1.0f, 1.0f, // 3 back white
     };
     private static final int stride = 24; // = 6 * Float.BYTES;
 

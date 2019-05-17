@@ -6,8 +6,8 @@ import android.content.Context;
 import android.opengl.GLSurfaceView;
 import android.opengl.Matrix;
 
-import java.util.ArrayList;
-import java.util.List;
+import java.util.LinkedHashSet;
+import java.util.Set;
 
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
@@ -16,19 +16,33 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
 
+    private float[] cp = new float[] { 0, 0, +1.0f}; // camera position
+    private float viewMaxDistance = 2.0f;
+    private float nearFarRatio = 0.25f;
     private final float[] mProjectionMatrix = new float[16];
     private final float[] mViewMatrix = new float[16];
 
-    private List<Object3D> objetos;
+    private Set<GLModel> models;
+    private Set<Object3D> objetos;
 
     public MainGLRenderer(Context context) {
         this.context = context;
 
-        objetos = new ArrayList<>();
+        models = new LinkedHashSet<>();
+        objetos = new LinkedHashSet<>();
     }
 
-    public List<Object3D> getObjetos() {
+    public Set<GLModel> getModels() {
+        return models;
+    }
+
+    public Set<Object3D> getObjetos() {
         return objetos;
+    }
+
+    public void addObject(Object3D obj) {
+        getObjetos().add(obj);
+        getModels().add(obj.getModel());
     }
 
     private volatile boolean modelsLoaded = true;
@@ -37,9 +51,10 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
         modelsLoaded = false;
     }
 
-    private void loadModels() {
-        for (Object3D obj : objetos) {
-            obj.getModel().load(context);
+    private void reloadModels() {
+        // TODO apagar models já carregados
+        for (GLModel model : models) {
+            model.load(context);
         }
         modelsLoaded = true;
     }
@@ -57,7 +72,9 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
         glViewport(0, 0, width, height);
 
         float ratio = (float) width / height;
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, 3, 7);
+        float far = viewMaxDistance;
+        float near = nearFarRatio * far;
+        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, near, far);
     }
 
     // mVP is an abbreviation for "View Projection Matrix"
@@ -66,11 +83,11 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
     @Override
     public void onDrawFrame(GL10 gl) {
         if (!modelsLoaded) {
-            loadModels();
+            reloadModels();
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Matrix.setLookAtM(mViewMatrix, 0, 0, 0, 5, 0f, 0f, 2f, 0f, 1.0f, 0.0f);
+        Matrix.setLookAtM(mViewMatrix, 0, cp[0], cp[1], cp[2], 0f, 0f, 0f, 0f, 1.0f, 0.0f);
         Matrix.multiplyMM(mVP, 0, mProjectionMatrix, 0, mViewMatrix, 0);
 
         for (Object3D obj : objetos) {
