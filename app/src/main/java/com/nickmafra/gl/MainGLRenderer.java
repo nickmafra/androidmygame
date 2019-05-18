@@ -16,20 +16,24 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
 
     private Context context;
 
-    private float[] cp = new float[] { 0, 0, +1.0f}; // camera position
-    private float viewMaxDistance = 2.0f;
-    private float nearFarRatio = 0.25f;
-    private final float[] mProjectionMatrix = new float[16];
-    private final float[] mViewMatrix = new float[16];
-
+    private Camera camera;
     private Set<GLModel> models;
     private Set<Object3D> objetos;
 
     public MainGLRenderer(Context context) {
         this.context = context;
 
+        camera = new Camera();
         models = new LinkedHashSet<>();
         objetos = new LinkedHashSet<>();
+    }
+
+    public Camera getCamera() {
+        return camera;
+    }
+
+    public void setCamera(Camera camera) {
+        this.camera = camera;
     }
 
     public Set<GLModel> getModels() {
@@ -71,14 +75,9 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
     public void onSurfaceChanged(GL10 gl, int width, int height) {
         glViewport(0, 0, width, height);
 
-        float ratio = (float) width / height;
-        float far = viewMaxDistance;
-        float near = nearFarRatio * far;
-        Matrix.frustumM(mProjectionMatrix, 0, -ratio, ratio, -1, 1, near, far);
+        camera.setScreen(width, height);
+        camera.recalcProjectionMatrix();
     }
-
-    // mVP is an abbreviation for "View Projection Matrix"
-    private final float[] mVP = new float[16];
 
     @Override
     public void onDrawFrame(GL10 gl) {
@@ -87,11 +86,11 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
         }
         glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-        Matrix.setLookAtM(mViewMatrix, 0, cp[0], cp[1], cp[2], 0f, 0f, 0f, 0f, 1.0f, 0.0f);
-        Matrix.multiplyMM(mVP, 0, mProjectionMatrix, 0, mViewMatrix, 0);
+        camera.recalcViewProjectionMatrix();
+        float[] vpm = camera.getViewProjectionMatrix();
 
         for (Object3D obj : objetos) {
-            obj.draw(mVP);
+            obj.draw(vpm);
         }
     }
 }

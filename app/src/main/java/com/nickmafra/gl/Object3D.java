@@ -10,14 +10,14 @@ public class Object3D {
     private GLModel model;
 
     // propriedades estáticas
-    private float[] p; // position (translation)
+    private float[] p; // position (model translation)
     private float[] rm; // rotation matrix
     private float[] s; // scale
     private float timeRef;
     private float timeNow;
 
     // propriedades dinâmicas
-    private float[] v; // linear velocity (translation)
+    private float[] v; // linear velocity (model translation)
     private float[] vr; // velocity of rotation: x, y, z, a
 
     public Object3D() {
@@ -42,12 +42,20 @@ public class Object3D {
         return p;
     }
 
+    public synchronized void setPosition(float[] p) {
+        this.p = p;
+    }
+
     public synchronized void setPosition(float x, float y, float z) {
         this.p = new float[] { x, y, z };
     }
 
     public float[] getRotationMatrix() {
         return rm;
+    }
+
+    public synchronized void setRotationMatrix(float[] rm) {
+        this.rm = rm;
     }
 
     /**
@@ -123,11 +131,15 @@ public class Object3D {
     }
 
     public float[] getVelocity() {
-        return Arrays.copyOf(v, 3);
+        return v;
     }
 
     public synchronized void setVelocity(float x, float y, float z) {
         this.v = new float[] { x, y, z };
+    }
+
+    public synchronized void setVelocity(float[] v) {
+        this.v = v;
     }
 
     public float[] getPositionNow() {
@@ -173,11 +185,11 @@ public class Object3D {
         return mmNow;
     }
 
-    public synchronized void draw(float[] mVP) {
+    public synchronized void draw(float[] vpMatrix) {
         float[] mmNow = getModelMatrixNow();
-        float[] mMVP = new float[16];
-        Matrix.multiplyMM(mMVP, 0, mVP, 0, mmNow, 0);
-        model.setMvpMatrix(mMVP);
+        float[] mvpMatrix = new float[16];
+        Matrix.multiplyMM(mvpMatrix, 0, vpMatrix, 0, mmNow, 0);
+        model.setMvpMatrix(mvpMatrix);
         model.draw();
     }
 }
