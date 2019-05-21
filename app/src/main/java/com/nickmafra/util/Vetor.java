@@ -112,4 +112,28 @@ public class Vetor {
     public static float[] loop(float[] v, float loopDist) {
         return loop(v, new float[v.length], loopDist);
     }
+
+    public static float[] interpolate(float[] a, float[] b, float ratio) {
+        int length = Math.min(a.length, b.length);
+        float[] result = new float[length];
+        for (int i = 0; i < length; i++) {
+            result[i] = (1 - ratio) * a[i] + ratio * b[i];
+        }
+        return result;
+    }
+
+    public static float[] interpolate(float[] a, float[] b, float[] c, float ratio) {
+        int length = Math.min(a.length, b.length);
+        float[] result = new float[length];
+        for (int i = 0; i < length; i++) {
+            if (ratio == 0.5f) {
+                result[i] = b[i];
+            } else if (ratio < 0.5f) {
+                result[i] = 2 * ((0.5f - ratio) * a[i] + ratio * b[i]);
+            } else if (ratio > 0.5f) {
+                result[i] = 2 * ((1f - ratio) * b[i] + (0.5f + ratio) * c[i]);
+            }
+        }
+        return result;
+    }
 }

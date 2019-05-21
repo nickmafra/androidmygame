@@ -7,20 +7,20 @@ import static android.opengl.GLES20.GL_VERTEX_SHADER;
 import static android.opengl.GLES20.glGetAttribLocation;
 import static android.opengl.GLES20.glGetUniformLocation;
 
-public class TextureGLProgram implements GLProgram {
+public class ColorGLProgram implements GLProgram {
 
-    private final String TAG = this.getClass().getSimpleName();
+    private static final String TAG = "ColorGLProgram";
 
     private int id;
-    private int mvpMatrixId, texId, posId, texCoordId;
+    private int mvpMatrixId, posId, colorId;
 
-    public TextureGLProgram() {
+    public ColorGLProgram() {
     }
 
     @Override
     public void reset() {
         id = 0;
-        mvpMatrixId = posId = texId = 0;
+        mvpMatrixId = posId = colorId = 0;
     }
 
     @Override
@@ -28,8 +28,8 @@ public class TextureGLProgram implements GLProgram {
         reset();
 
         // carrega e compila shaders
-        String vsCode = GLUtil.loadShaderCode(context, "textureVS.glsl");
-        String fsCode = GLUtil.loadShaderCode(context, "textureFS.glsl");
+        String vsCode = GLUtil.loadShaderCode(context, "colorVS.glsl");
+        String fsCode = GLUtil.loadShaderCode(context, "colorFS.glsl");
         if (vsCode == null || fsCode == null) {
             throw new RuntimeException("Erro ao carregar shaders.");
         }
@@ -46,10 +46,8 @@ public class TextureGLProgram implements GLProgram {
         }
 
         mvpMatrixId = glGetUniformLocation(id, "uMVPMatrix");
-        texId = glGetUniformLocation(id, "uTex");
         posId = glGetAttribLocation(id, "aPos");
-        texCoordId = glGetAttribLocation(id, "aTexCoord");
-        GLUtil.checkGlError(TAG + ".load");
+        colorId = glGetUniformLocation(id, "uColor");
     }
 
     @Override
@@ -61,15 +59,11 @@ public class TextureGLProgram implements GLProgram {
         return mvpMatrixId;
     }
 
-    public int getTexId() {
-        return texId;
-    }
-
     public int getPosId() {
         return posId;
     }
 
-    public int getTexCoordId() {
-        return texCoordId;
+    public int getColorId() {
+        return colorId;
     }
 }

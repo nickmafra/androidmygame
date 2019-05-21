@@ -3,6 +3,8 @@ package com.nickmafra.mygame.gl;
 import static android.opengl.GLES30.*;
 
 import android.content.Context;
+import android.graphics.Bitmap;
+import android.graphics.BitmapFactory;
 import android.util.Log;
 
 import java.io.BufferedReader;
@@ -13,6 +15,11 @@ import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
 import java.nio.FloatBuffer;
 import java.nio.ShortBuffer;
+
+import de.javagl.obj.FloatTuple;
+import de.javagl.obj.Obj;
+import de.javagl.obj.ObjFace;
+import de.javagl.obj.ObjReader;
 
 public class GLUtil {
 
@@ -86,7 +93,7 @@ public class GLUtil {
     }
 
     public static String loadShaderCode(Context context, String path) {
-        InputStream in = loadAsset(context, path);
+        InputStream in = loadAsset(context, "shaders/" + path);
         String shaderCode;
         try {
             StringBuilder buffer = new StringBuilder();
@@ -107,5 +114,39 @@ public class GLUtil {
         while ((error = glGetError()) != GL_NO_ERROR) {
             Log.e(TAG, glOperation + ": glError " + error);
         }
+    }
+
+    public static FloatBuffer loadModelAsset(Context context, String modelAsset) {
+        InputStream in = loadAsset(context, "models/" + modelAsset);
+        Obj obj;
+        try {
+            obj = ObjReader.read(in);
+        } catch (IOException e) {
+            throw new RuntimeException("Erro ao ler modelo " + modelAsset, e);
+        }
+
+        int n = obj.getNumFaces();
+        float[] array = new float[3 * n * 5];
+        int c = 0;
+        for (int i = 0; i < n; i++) {
+            ObjFace face = obj.getFace(i);
+            for (int j = 0; j < 3; j++) {
+                FloatTuple v =  obj.getVertex(face.getVertexIndex(j));
+                array[c++] = v.getX();
+                array[c++] = v.getY();
+                array[c++] = v.getZ();
+                FloatTuple t = obj.getTexCoord(face.getTexCoordIndex(j));
+                array[c++] = t.getX();
+                array[c++] = t.getY();
+            }
+        }
+        return makeFloatBuffer(array);
+    }
+
+    public static Bitmap loadTexture(Context context, String textureAsset) {
+        final BitmapFactory.Options options = new BitmapFactory.Options();
+        options.inScaled = false;   // No pre-scaling
+        InputStream in = loadAsset(context, "textures/" + textureAsset);
+        return BitmapFactory.decodeStream(in);
     }
 }

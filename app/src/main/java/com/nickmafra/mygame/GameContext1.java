@@ -5,11 +5,11 @@ import android.opengl.Matrix;
 import com.nickmafra.mygame.gl.Camera;
 import com.nickmafra.mygame.gl.Object3D;
 import com.nickmafra.mygame.gl.PiramideModel;
+import com.nickmafra.util.Rdm;
 import com.nickmafra.util.Vetor;
 
 import java.util.ArrayList;
 import java.util.List;
-import java.util.Random;
 
 public class GameContext1 implements GameContext {
 
@@ -26,40 +26,25 @@ public class GameContext1 implements GameContext {
         this.engine = engine;
     }
 
-    private static final Random random = new Random();
-
-    private static float nextRandom(float min, float max) {
-        return min + (max - min) * random.nextFloat();
-    }
-
-    private float[] nextSpherePosition() {
-        float a1 = nextRandom(0, 2 * (float) Math.PI);
-        float a2 = nextRandom(0, 2 * (float) Math.PI);
-        return new float[] {
-                (float) (Math.sin(a1) * Math.cos(a2)),
-                (float) (Math.sin(a1) * Math.sin(a2)),
-                (float) Math.cos(a1)
-        };
-    }
-
     private void recriarObstaculo(Object3D obstaculo, float[] c) {
         obstaculo.update();
-        float scale = nextRandom(0.02f, 0.05f);
+        float scale = Rdm.nextRandom(0.02f, 0.05f);
         obstaculo.setScale(scale, scale, scale);
 
-        float[] p = nextSpherePosition();
-        float[] p2 = nextSpherePosition();
-        float speed = nextRandom(0, 0.005f);
+        float[] p = Rdm.nextSpherePosition();
+        float[] p2 = Rdm.nextSpherePosition();
+        float speed = Rdm.nextRandom(0, 0.005f);
         float[] v = new float[3];
+        float dist = maxDist * Rdm.nextRandom(0.9f, 1.1f);
         for (int i = 0; i < 3; i++) {
             v[i] = speed * (p2[i] - p[i]) / 2;
-            p[i] = c[i] + p[i] * maxDist;
+            p[i] = c[i] + p[i] * dist;
         }
         obstaculo.setPosition(p);
         obstaculo.setVelocity(v);
 
-        float a = (random.nextInt(41) - 20) / 100f;
-        obstaculo.setVRotation(nextRandom(0, 1), nextRandom(0, 1), nextRandom(0, 1), a);
+        float a = (Rdm.random.nextInt(41) - 20) / 100f;
+        obstaculo.setVRotation(Rdm.nextRandom(0, 1), Rdm.nextRandom(0, 1), Rdm.nextRandom(0, 1), a);
     }
 
     private int qtObstaculos = 50;
@@ -146,11 +131,11 @@ public class GameContext1 implements GameContext {
     }
 
     public void setYProp1(float y) {
-        naveModel.setAngle1(-y * naveModel.getAMax());
+        naveModel.setAngle1(y * naveModel.getAMax());
     }
 
     public void setYProp2(float y) {
-        naveModel.setAngle2(-y * naveModel.getAMax());
+        naveModel.setAngle2(y * naveModel.getAMax());
     }
 
     private void girarCamera() {

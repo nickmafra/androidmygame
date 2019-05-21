@@ -2,17 +2,9 @@ package com.nickmafra.mygame.gl;
 
 import android.content.Context;
 import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.opengl.GLUtils;
 
-import java.io.IOException;
-import java.io.InputStream;
 import java.nio.Buffer;
-
-import de.javagl.obj.FloatTuple;
-import de.javagl.obj.Obj;
-import de.javagl.obj.ObjFace;
-import de.javagl.obj.ObjReader;
 
 import static android.opengl.GLES20.*;
 
@@ -27,7 +19,7 @@ public class TextureModel implements GLModel {
 
     private Buffer buffer;
 
-    private int[] bufferIds = new int[2];
+    private int[] bufferIds = new int[1];
     private int[] texIds = new int[1];
     private TextureGLProgram program;
 
@@ -68,30 +60,7 @@ public class TextureModel implements GLModel {
         if (modelAsset == null) {
             throw new RuntimeException("Model não definido.");
         }
-        InputStream in = GLUtil.loadAsset(context, "models/" + modelAsset);
-        Obj obj;
-        try {
-            obj = ObjReader.read(in);
-        } catch (IOException e) {
-            throw new RuntimeException("Erro ao ler modelo " + modelAsset, e);
-        }
-
-        int n = obj.getNumFaces();
-        float[] array = new float[3 * n * 5];
-        int c = 0;
-        for (int i = 0; i < n; i++) {
-            ObjFace face = obj.getFace(i);
-            for (int j = 0; j < 3; j++) {
-                FloatTuple v =  obj.getVertex(face.getVertexIndex(j));
-                array[c++] = v.getX();
-                array[c++] = v.getY();
-                array[c++] = v.getZ();
-                FloatTuple t = obj.getTexCoord(face.getTexCoordIndex(j));
-                array[c++] = t.getX();
-                array[c++] = t.getY();
-            }
-        }
-        buffer = GLUtil.makeFloatBuffer(array);
+        buffer = GLUtil.loadModelAsset(context, modelAsset);
         glBindBuffer(GL_ARRAY_BUFFER, bufferIds[0]);
         glBufferData(GL_ARRAY_BUFFER, buffer.capacity() * 4, buffer, GL_STATIC_DRAW);
 
@@ -100,10 +69,7 @@ public class TextureModel implements GLModel {
     }
 
     public void loadTexture(Context context) {
-        InputStream in = GLUtil.loadAsset(context, "textures/" + textureAsset);
-        final BitmapFactory.Options options = new BitmapFactory.Options();
-        options.inScaled = false;   // No pre-scaling
-        Bitmap bitmap = BitmapFactory.decodeStream(in);
+        Bitmap bitmap = GLUtil.loadTexture(context, textureAsset);
 
         glBindTexture(GL_TEXTURE_2D, texIds[0]);
         // Set filtering
