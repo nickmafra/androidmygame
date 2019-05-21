@@ -1,4 +1,4 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import android.content.Context;
 

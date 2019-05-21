@@ -1,4 +1,4 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import android.content.Context;
 
@@ -25,8 +25,8 @@ public class SimpleGLProgram implements GLProgram {
         reset();
 
         // carrega e compila shaders
-        String vsCode = GLUtil.loadAsset(context, "shaders/simpleVS.glsl");
-        String fsCode = GLUtil.loadAsset(context, "shaders/simpleFS.glsl");
+        String vsCode = GLUtil.loadShaderCode(context, "shaders/simpleVS.glsl");
+        String fsCode = GLUtil.loadShaderCode(context, "shaders/simpleFS.glsl");
         if (vsCode == null || fsCode == null) {
             throw new RuntimeException("Erro ao carregar shaders.");
         }

@@ -1,4 +1,4 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import android.opengl.Matrix;
 
@@ -13,7 +13,7 @@ public class Camera {
     private float[] rmm = new float[16]; // relative model matrix
     private float[] vm = new float[16]; // view matrix
 
-    private float[] f = new float[] {-1, 1, -1, 1, 0.5f, 3}; // left, right, bottom, top, near, far
+    private float[] f = new float[] {-1, 1, -1, 1, 0.5f, 6}; // left, right, bottom, top, near, far
     private float[] pm = new float[16]; // projection matrix
 
     private float[] vpm = new float[16]; // view projection matrix
@@ -43,6 +43,10 @@ public class Camera {
 
     public void setZoom(float zoom) {
         this.zoom = zoom;
+    }
+
+    public float[] getRelativeModelMatrix() {
+        return Arrays.copyOf(rmm, 16);
     }
 
     public void setRelativeModelMatrix(float[] rmm) {
@@ -96,11 +100,19 @@ public class Camera {
     }
 
     public void setScreen(float width, float height) {
-        float ratio = width / height;
-        f[0] = -ratio;
-        f[1] = ratio;
-        f[2] = -1;
-        f[3] = 1;
+        if (width >= height) {
+            float ratio = height / width;
+            f[0] = -1;
+            f[1] = 1;
+            f[2] = -ratio;
+            f[3] = ratio;
+        } else {
+            float ratio = width / height;
+            f[0] = -ratio;
+            f[1] = ratio;
+            f[2] = -1;
+            f[3] = 1;
+        }
     }
 
     public void setNearFar(float near, float far) {

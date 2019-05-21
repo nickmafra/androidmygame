@@ -1,10 +1,14 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.android;
 
 import static android.opengl.GLES20.*;
 
 import android.content.Context;
 import android.opengl.GLSurfaceView;
-import android.opengl.Matrix;
+
+import com.nickmafra.mygame.gl.Camera;
+import com.nickmafra.mygame.gl.GLModel;
+import com.nickmafra.mygame.gl.Object3D;
+import com.nickmafra.mygame.GameEngine;
 
 import java.util.LinkedHashSet;
 import java.util.Set;
@@ -12,20 +16,24 @@ import java.util.Set;
 import javax.microedition.khronos.egl.EGLConfig;
 import javax.microedition.khronos.opengles.GL10;
 
-public class MainGLRenderer implements GLSurfaceView.Renderer {
-
-    private Context context;
+public class GLRendererView extends GLSurfaceView implements GLSurfaceView.Renderer {
 
     private Camera camera;
     private Set<GLModel> models;
     private Set<Object3D> objetos;
 
-    public MainGLRenderer(Context context) {
-        this.context = context;
+    public GLRendererView(Context context, GameEngine gameEngine) {
+        super(context);
 
         camera = new Camera();
         models = new LinkedHashSet<>();
         objetos = new LinkedHashSet<>();
+
+        setEGLContextClientVersion(3);
+        setRenderer(this);
+        setRenderMode(GLSurfaceView.RENDERMODE_WHEN_DIRTY);
+
+        setOnTouchListener(new GameListener(gameEngine));
     }
 
     public Camera getCamera() {
@@ -58,7 +66,7 @@ public class MainGLRenderer implements GLSurfaceView.Renderer {
     private void reloadModels() {
         // TODO apagar models já carregados
         for (GLModel model : models) {
-            model.load(context);
+            model.load(getContext());
         }
         modelsLoaded = true;
     }

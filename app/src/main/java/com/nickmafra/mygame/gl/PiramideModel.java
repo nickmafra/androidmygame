@@ -1,52 +1,27 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import android.content.Context;
 
 import java.nio.Buffer;
 
-import static android.opengl.GLES20.GL_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_ELEMENT_ARRAY_BUFFER;
-import static android.opengl.GLES20.GL_FLOAT;
-import static android.opengl.GLES20.GL_STATIC_DRAW;
-import static android.opengl.GLES20.GL_TRIANGLES;
-import static android.opengl.GLES20.GL_UNSIGNED_SHORT;
-import static android.opengl.GLES20.glBindBuffer;
-import static android.opengl.GLES20.glBufferData;
-import static android.opengl.GLES20.glDisableVertexAttribArray;
-import static android.opengl.GLES20.glDrawElements;
-import static android.opengl.GLES20.glEnableVertexAttribArray;
-import static android.opengl.GLES20.glGenBuffers;
-import static android.opengl.GLES20.glUniformMatrix4fv;
-import static android.opengl.GLES20.glUseProgram;
-import static android.opengl.GLES20.glVertexAttribPointer;
+import static android.opengl.GLES20.*;
 
-public class NaveModel implements GLModel {
-
-    private final String TAG = this.getClass().getSimpleName();
+public class PiramideModel implements GLModel {
 
             // position          // color
     private static final float verticesData[] = {
-            -1.0f, -0.3f, +1.0f, 0.5f, 0.5f, 0.8f, // 0 left blue
-            +1.0f, -0.3f, +1.0f, 0.5f, 0.5f, 0.8f, // 1 right blue
-             0.0f, +1.3f, +1.0f, 0.5f, 0.5f, 0.8f, // 2 top blue
-             0.0f, -0.3f, +0.7f, 0.5f, 0.5f, 0.5f, // 3 bottom grey
-             0.0f,  0.0f, -1.0f, 1.0f, 1.0f, 1.0f, // 4 front white
-            -0.3f, +0.4f, +1.0f, 0.5f, 0.5f, 0.8f, // 5 left2 blue
-            +0.3f, +0.4f, +1.0f, 0.5f, 0.5f, 0.8f, // 6 right2 blue
+            -1.0f, +1.0f, -1.0f, 0.0f, 0.0f, 1.0f, // 0 left blue
+            +1.0f, -1.0f, -1.0f, 1.0f, 0.0f, 0.0f, // 1 right red
+            +1.0f, +1.0f, +1.0f, 0.0f, 1.0f, 0.0f, // 2 top green
+            -1.0f, -1.0f, +1.0f, 1.0f, 1.0f, 1.0f, // 3 back white
     };
     private static final int stride = 24; // = 6 * Float.BYTES;
 
     private static final short elementsData[] = {
-            0, 3, 5,    // left back
-            3, 1, 6,    // right back
-            5, 3, 6,    // center back
-            2, 5, 6,    // top back
-            4, 0, 5,    // left front
-            4, 5, 2,    // left2 front
-            4, 2, 6,    // right2 front
-            4, 6, 1,    // right front
-            4, 1, 3,    // bottom left
-            4, 3, 0,    // bottom right
+            3, 0, 2,    // left T: back, left, top
+            1, 3, 2,    // right T: right, back, top
+            0, 1, 2,    // front T: left, right, top
+            0, 3, 1,    // bottom T: left, back, right
     };
 
     private Buffer vertexBuffer;
@@ -57,7 +32,7 @@ public class NaveModel implements GLModel {
 
     private float[] mvpMatrix;
 
-    public NaveModel() {
+    public PiramideModel() {
         vertexBuffer = GLUtil.makeFloatBuffer(verticesData);
         elementBuffer = GLUtil.makeShortBuffer(elementsData);
         program = new SimpleGLProgram();
@@ -108,6 +83,6 @@ public class NaveModel implements GLModel {
         glDisableVertexAttribArray(program.getColorId());
         glUseProgram(0);
 
-        GLUtil.checkGlError(TAG + ".draw");
+        GLUtil.checkGlError("PiramideModel.draw");
     }
 }

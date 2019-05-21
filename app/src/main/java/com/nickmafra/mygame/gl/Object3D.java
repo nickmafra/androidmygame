@@ -1,7 +1,6 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import android.opengl.Matrix;
-import android.util.Log;
 
 import java.util.Arrays;
 
@@ -131,7 +130,7 @@ public class Object3D {
     }
 
     public float[] getVelocity() {
-        return v;
+        return Arrays.copyOf(v, 3);
     }
 
     public synchronized void setVelocity(float x, float y, float z) {

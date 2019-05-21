@@ -1,4 +1,4 @@
-package com.nickmafra.gl;
+package com.nickmafra.mygame.gl;
 
 import static android.opengl.GLES30.*;
 
@@ -72,14 +72,24 @@ public class GLUtil {
         return programID;
     }
 
-    public static String loadAsset(Context context, String path) {
-        String shaderCode = null;
+    public static InputStream loadAsset(Context context, String path) {
+        InputStream in = null;
         try {
-            StringBuffer buffer = new StringBuffer();
-            InputStream in = context.getAssets().open(path);
-            if (in == null) {
-                throw new RuntimeException("Recurso não encontrado");
-            }
+            in = context.getAssets().open(path);
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        if (in == null) {
+            throw new RuntimeException("Recurso não encontrado");
+        }
+        return in;
+    }
+
+    public static String loadShaderCode(Context context, String path) {
+        InputStream in = loadAsset(context, path);
+        String shaderCode;
+        try {
+            StringBuilder buffer = new StringBuilder();
             BufferedReader reader = new BufferedReader(new InputStreamReader(in));
             String line;
             while ((line = reader.readLine()) != null)
@@ -87,6 +97,7 @@ public class GLUtil {
             shaderCode = buffer.toString();
         } catch (IOException e) {
             e.printStackTrace();
+            shaderCode = null;
         }
         return shaderCode;
     }
